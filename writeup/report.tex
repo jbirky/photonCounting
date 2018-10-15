@@ -1,17 +1,15 @@
-\documentclass[onecolumn]{aastex62}
+\documentclass[preprint]{aastex62}
 
 \shorttitle{photon counting \& detectors}
 \shortauthors{j. birky}
 
 
 \begin{document}
-
 \title{\sc Lab 1: Photon Counting \& Detectors}
 
 \author{Jessica Birky (A13002163)}
 
 \begin{abstract}
-
 This example manuscript is intended to serve as a tutorial and template for
 authors to use when writing their own AAS Journal articles. The manuscript
 includes a history of and documents the new features in the
@@ -43,7 +41,25 @@ Nickel telescope, what are bias and flat frames
 % ==================================
 \section{Data Reduction \& Methods}
 \subsection{Theoretical Distribution of Light}
-Poisson statistics and motivation
+Before we can characterize our observations, it is important to first determine what we expect our data will look like. That is, we are measuring the number of photons hitting a detector over a fixed amount of time, what do we predict will be the number of photons that will hit each pixel in that tme interval? Let's assume that on average $\mu$ photons will hit a pixel over fixed time interval $t$. Now consider dividing that time interval into $n$ increments: the probability that a $n$ photons arrive to the detector is approximately Binomial. Now in the limit that $n\rightarrow\infty$, we arrive at the Poisson distribution:
+\begin{equation}
+P(x;\mu) = \frac{\mu^x}{x!}e^{-\mu}
+\end{equation}
+which we interpret as the probability that x photons will arrive to a detector pixel in time interval $t$, given that $\mu$ photons arrive in that interval on average. The expected mean and variation for this distribution being $\langle x \rangle = \mu$ and $\langle \sigma^2 \rangle = \mu$.
+
+In practice, the Poisson distribution is unstable to compute for large values of x because the term $x!$ becomes too large for the memory of the computer to handle. In order to try to reduce the memory load for large values of x, we tried approximating the $x!$ term using the Sterling approximation which requires less floating point operations than calculating factorials directly:
+\begin{equation}
+n! \sim \sqrt{2\pi n}\left(\frac{n}{e} \right)^n
+\end{equation}
+
+We found that the Sterling approximation is advantageous for approximating the Poisson at continuous values of x (whereas the exact method for computing can only take discrete values of x for $x!$), however it does not make the solution any more numerically stable for values of x larger than $\sim15$ (Figure \ref{fig:poisson}).
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=.48\linewidth]{plots/poisson_comparisons.png}
+\caption{Comparison of different methods for computing the Poisson distribution.} \label{fig:poisson}
+\end{center}
+\end{figure}
 
 \subsection{Data Manipulation}
 Procedure to combine frames and subtract bias, point to code
@@ -95,6 +111,13 @@ Dust particles on the lens scatter and absorb light unevenly at different points
 
 \subsection{Systematic Effects}
 Checked for systematics due to temperature variation, and checked for differences in different datasets. Found temperature to vary only within 4C
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=.48\linewidth]{plots/exposure_temp.png}
+\caption{Temperature of the CCD detector for different exposure frames does not vary more than about 4C.}
+\end{center}
+\end{figure}
 
 % ==================================
 \section{Conclusion}
