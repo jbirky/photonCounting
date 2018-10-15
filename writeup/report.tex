@@ -12,8 +12,6 @@
 
 \begin{document}
 
-\begin{frame}[fragile]
-
 \title{\sc Lab 1: Photon Counting \& Detectors}
 \author{Jessica Birky (A13002163)}
 
@@ -188,7 +186,7 @@ def factorial(n, **kwargs):
 
 def poisson_approx(xarray, mu, **kwargs):
     
-    method = kwargs.get('method')
+    method = kwargs.get('method', 'sterling')
     
     pdist = np.array([mu**x/factorial(x, method=method) * math.e**(-mu) \
     		for x in xarray])
@@ -225,6 +223,82 @@ def combineFrame(data_array):
     """
     
     return np.median(data_array, axis=0)
+\end{lstlisting}
+
+\textbf{Histogram/Image code} \label{code:plots} \\
+\hrule
+\begin{lstlisting}
+def plotAll(array2D, **kwargs):
+    
+    arr = array2D.flatten()
+    
+    avg = mean(arr)
+    std = stdev(arr)
+    med = median(arr)
+    Npix = len(arr)
+    
+    sigma = kwargs.get('sigma', 2)
+    low = int(np.round((avg-sigma*std)))
+    high = int(np.round((avg+sigma*std)))
+    rng = kwargs.get('rng', [low, high])
+    exp = kwargs.get('exp')
+    
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize=[18,6])
+    
+    # Histogram
+    #===========
+    hr = np.arange(rng[0], rng[1])
+    hist = []
+    for i in hr:
+        counts = len(np.where(arr==i)[0])
+        hist.append(counts)
+    #normalize histogram
+    hist = np.array(hist)/sum(hist)
+    ax1.step(hr, hist, color='k')
+
+    #mean and median lines
+    ax1.axvline(avg, color='b', label=r'$\bar{x}=%s$'%(np.round(avg,2)))
+    ax1.axvline(med, color='b', label=r'$\tilde{x}=%s$'%(np.round(med,2)), linestyle='dashed')
+    
+    #sigma levels
+    if kwargs.get('show_level', True) == True:
+        for i in np.arange(1,sigma+1):
+            if i == 1:
+                ax1.axvspan(avg-i*std, avg+i*std, facecolor='g', alpha=0.05, label=r'$s=\pm %s$'%(np.round(std,2)))
+            else:
+                ax1.axvspan(avg-i*std, avg+i*std, facecolor='g', alpha=0.05)
+                
+                
+    #poisson distribution
+    xarray = np.arange(rng[0], rng[1], 1)
+    pdist = poisson.pmf(xarray, avg)
+    ax1.plot(xarray, pdist, color='r', label=r'$P_{Poisson}(x;\bar{x})$')
+    std_expected = math.sqrt(avg)
+    ax1.axvspan(avg - std_expected, avg + std_expected, facecolor='r', alpha=0.05, \
+                label=r'$\sigma=\pm %s$'%(np.round(std_expected,2)))
+    
+    ax1.legend(loc='upper left')
+    ax1.set_xlabel('Counts (ADU)')
+    ax1.set_ylabel('Frequency')
+    
+    if 'exp' in kwargs:
+        ax1.set_title('Combined Histogram (Exposure Time: %s sec)'%(exp))
+    ax1.set_xlim(rng)
+    
+    # Image
+    #===========
+    hrng = kwargs.get('hrng', [np.percentile(arr, 10), np.percentile(arr, 90)])
+    pl = ax2.imshow(array2D, origin='lower', interpolation='nearest', cmap='gray', vmin=hrng[0], vmax=hrng[1])
+    fig.colorbar(pl, ax=ax2, fraction=0.046, pad=0.04).set_label('Detector Value (ADU)')
+    
+    ax2.set_xlabel('pixels(x)')
+    ax2.set_ylabel('pixels(y)')
+    ax2.set_title('Combined Image')
+    
+    if 'save_dir' in kwargs:
+        save_dir = kwargs.get('save_dir')
+        plt.savefig(save_dir + 'exposure%s.png'%(exp))
+    plt.show()
 \end{lstlisting}
 
 % \lstinputlisting[language=Matlab]{./Code/calc_error.m}
