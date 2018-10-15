@@ -1,12 +1,20 @@
 \documentclass[preprint]{aastex62}
 
+% \usepackage{minted}
+\usepackage{listings}
+\usepackage{courier}
+
+\definecolor{bcolor}{RGB}{0, 51, 153}
+\definecolor{gcolor}{RGB}{51, 153, 51}
+
 \shorttitle{photon counting \& detectors}
 \shortauthors{j. birky}
 
-
 \begin{document}
-\title{\sc Lab 1: Photon Counting \& Detectors}
 
+\begin{frame}[fragile]
+
+\title{\sc Lab 1: Photon Counting \& Detectors}
 \author{Jessica Birky (A13002163)}
 
 \begin{abstract}
@@ -32,6 +40,8 @@ Editorial office will ask you to shorten it.
 In order to understand the. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves). Understanding how detectors work, the statistics of light collection, as well as the limitations of the instrument and sources of contaminations are a fundamental first steps before performing any scientific analysis with an instrument.
 
 CCDs, the photoelectric effect
+
+Types of noise we want to quantify
 
 % ==================================
 \section{Observations}
@@ -145,6 +155,79 @@ Mean and variance for a set of data points $x={x_1, ...,x_N}$:
 
 \subsection{Code}
 
+\lstset{language=Python,
+        basicstyle=\footnotesize\ttfamily,
+        keywordstyle=\color{blue},
+        numbers=left,
+        stringstyle=\color{red},
+        commentstyle=\color{gcolor},
+        morecomment=[l][\color{gray}]{\#}
+}
+\small
+\textbf{Statistical Code} \label{code:stats} \\
+\hrule
+\begin{lstlisting}
+def mean(array):
+    return np.sum(array)/len(array)
+
+def stdev(array):
+    return np.sqrt(sum((array - mean(array))**2)/(len(array) - 1))
+
+def factorial(n, **kwargs):
+    
+    method = kwargs.get('method', 'sterling')
+    
+    if method == 'exact':
+        nfact = 1
+        for i in range(n):
+            nfact *= (i+1)
+    elif method == 'sterling': 
+        nfact = math.sqrt(2*math.pi) * n**(n+.5) / math.e**n
+        
+    return nfact
+
+def poisson_approx(xarray, mu, **kwargs):
+    
+    method = kwargs.get('method')
+    
+    pdist = np.array([mu**x/factorial(x, method=method) * math.e**(-mu) \
+    		for x in xarray])
+    
+    return pdist
+\end{lstlisting}
+
+\textbf{Data Processing code} \label{code:data} \\
+\hrule
+\begin{lstlisting}
+def readData(folder):
+    """
+    Read all frames from a given directory into one matrix.
+    input:  directory to folder containing frames
+    output: array3d (dimension: xpixel x ypixel x # frames)
+            array2D (dimension: 1D flattened img x # frames)
+    """
+    
+    files = os.listdir(folder)
+
+    array3D, array2D = [], []
+    for ff in files:
+        arr = fits.getdata(folder + ff)
+        array3D.append(arr)
+        array2D.append(arr.flatten())
+    
+    return np.array(array3D)
+
+def combineFrame(data_array):
+    """
+    Combine image frames and return 1D array.
+    input:  data array (dimension: # 1D detector counts x # frames)
+    output: 1D combined array of detector counts (ADU)
+    """
+    
+    return np.median(data_array, axis=0)
+\end{lstlisting}
+
+% \lstinputlisting[language=Matlab]{./Code/calc_error.m}
 
 % \begin{thebibliography}{}
 % \bibitem[Astropy Collaboration et al.(2013)]{2013A&A...558A..33A} Astropy Collaboration, Robitaille, T.~P., Tollerud, E.~J., et al.\ 2013, \aap, 558, A33 
