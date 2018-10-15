@@ -103,10 +103,12 @@ The right side of each panel shows the 2D images. In order to visualize the dete
 \end{figure}
 
 \subsection{Quatifying Detector Noise}
+Calculate readnoise n stuff
 
 % ==================================
 \section{Discussion}
 \subsection{Poisson Comparisons}
+Looking at Figures \ref{fig:flats1} and \ref{fig:flats2}, we find that the detector count distribution is close to a Poisson distribution for low exposure times, but for larger exposure times it increasingly diverges with a much larger standard deviations than expected (as summarized by Figure \ref{fig:mean_var}). We also see that low exposure times (3, 6, and 12 sec) have a single peak in the distribution around the mean, however at 48 sec the distribution becomes bimodal, and for high exposure times (96, 192, 384, and 768 sec) the distribution develops three separate peaks. Comparing these histograms to the corresponding images at the right, we can see the regions on the detector which correspond to the different peaks: the dark edges make up roughly the bottom third of the distribution, and the bright center making up the higher thrid of the distribution. If the distribution was Poissonian for each pixel, we would expect the signal to vary uniformly across the detector, but instead there is obvious contamination at different spatial regions.
 
 \subsection{Sources of Noise \& Systematic Effects}
 Variations in the quantum efficiency of each pixel.
