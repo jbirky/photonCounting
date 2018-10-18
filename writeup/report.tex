@@ -3,6 +3,8 @@
 % \usepackage{minted}
 \usepackage{listings}
 \usepackage{courier}
+\usepackage{cleveref}
+\usepackage{float}
 
 \definecolor{bcolor}{RGB}{0, 51, 153}
 \definecolor{gcolor}{RGB}{51, 153, 51}
@@ -19,7 +21,7 @@
 \email{jbirky@ucsd.edu}
 
 \begin{abstract}
-In this lab, we examine the statistics of photon counting, and the noise properties of a charged couple device (CCD) using 2048x2048 pixel optical images taken on the Nickel 1 meter direct imaging camera. In particular we characterize the effect of several types of noise: first the inherent noise of photon counting by comparing to the Poisson distribution, second the read noise, and lastly we comment the effect of different systematics such as dark current due to temperature variations or detector deffects. In total we collect XX frames integrated at varying exposure times ranging from 0 to 768 seconds. Comparing the slope between mean and variance of each bias-subtracted, combined frame of each exposure, we determine the gain of the detector to be XX. Normalizing our frames (dividing the counts by exposure time) we find that as we add more exposures, the mean of the mean (MOM) detector counts per second converges to XX ADU/s and the standard deviation of the mean (SDOM) decreases to XX ADU/s with more frames added.
+In this lab, we examine the statistics of photon counting, and the noise properties of a charged couple device (CCD) using 2048x2048 pixel optical images taken on the Nickel 1 meter direct imaging camera. In particular we characterize the effect of several types of noise: first the inherent noise of photon counting by comparing to the Poisson distribution, second the read noise, and lastly we comment the effect of different systematics such as instrument defects or dark current due to temperature variations. In total we collect XX frames integrated at varying exposure times ranging from 0 to 768 seconds. Comparing the slope between mean and variance of each bias-subtracted, combined frame of each exposure, we determine the gain of the detector to be XX ADU/s. Normalizing our frames (dividing the counts by exposure time) we find that as we add more exposures, the mean of the mean (MOM) detector counts per second converges to XX ADU/s and the standard deviation of the mean (SDOM) decreases to XX ADU/s with more frames added.
 
 \end{abstract}
 \bigskip
@@ -33,9 +35,9 @@ Types of noise we want to quantify
 
 % ==================================
 \section{Observations}
-Nickel telescope, what are bias and flat frames
+Nickel telescope, what are bias and flat frames (Table \ref{table:log})
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \begin{tabular}{|c|c|c|c|c|}
     \hline
@@ -54,7 +56,7 @@ Nickel telescope, what are bias and flat frames
     441 & --  & 1 & Flat & 768 \\
     \hline
 \end{tabular}
-\caption{Observation log, recording the files associated with each exposure time. Files $405-418$ were removed due to inconsistent count numbers.}
+\caption{Observation log, recording the files associated with each exposure time. Files $405-418$ were removed due to inconsistent count numbers.} \label{table:log}
 \end{table}
 
 
@@ -79,49 +81,41 @@ P(x; \mu, \sigma) = \frac{1}{\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
 \end{equation}
 where the input parameters are the mean and standard deviation of the data ($\mu$ and $\sigma$). The code for the Gaussian distribution is implemented in lines $11-13$ of Appendix \ref{code:stats}. 
 
-\subsection{Data Manipulation}
-Procedure to combine frames and subtract bias, point to code
+\subsection{Data Reduction} \label{sec:reduction}
+For each exposure observed, the data output from the Nickel instrument is stored in a fits file, which contains the two-dimensional array of detector counts at each pixel, as well as other relevant variables about the detection (such as the detector temperature, time of observation, exposure time, etc.). The first step of reduction consists of combining the bias frames, and our procedure for combining frames (lines $19-26$, \ref{code:data}) is to take the median count value at each pixel. Second, for each exposure, we read the individual files from a directory, subtract the combined bias, then combine those into a single frame (lines $9-11$, \ref{code:reduction}).
 
-\subsection{Types of Detector Noise}
+As discussed in further the results (\ref{subsec:diagnostic})
+
+\subsection{Types of Detector Noise} \label{subsec:noise}
 How to calculate the readnoise, other noise, error propagation
+
+\begin{equation}
+\sigma_{ADU}^2 = \frac{ge}{C} \left(ADU - ADU_0 \right) + \sigma_0^2
+\end{equation}
+Thus the gain (ge/C) is the linear slope between the mean and variance of the ADU counts for each bias-subtracted, combined exposure frame. To numerically determine the gain from our data we fit a second-order polynomial to our mean vs. variance plot (lines $1-7$, \ref{code:gain}), and the gain is then the first order term (coefficient of x).
 
 % ==================================
 \section{Data Analysis \& Modeling}
-\subsection{Bias Frames}
 
-\begin{figure}[ht]
+\subsection{Diagnostic Plots: Combined Images \& Histograms} \label{subsec:diagnostic}
+Figure \ref{fig:bias} shows the combined bias frames, and the figures in \ref{fig:flats1} and \ref{fig:flats2} show the bias-subtracted, combined histograms and images for each of the eight different exposure times (3, 6, 12, 24, 48, 96, 192, 384, and 768 seconds), using the procedures described in \ref{sec:reduction}. Lines $25-33$ of \ref{code:plots} plots the histogram, and lines $72-75$ plot the image.
+
+The left side of each panel shows the histogram of the number of detector counts in analog to digital units (ADU), normalized such that the sum of all of the bins is one (plotted in black). The solid blue vertical line marks the mean of the data, and the dashed blue line marks the median, indicating which distrubtions are symmetric or skewed. For all histograms however, the mean and median are very close, meaning the distributions are quite symmetric. The two shades of green mark $\pm1$ and $\pm2$ standard deviations above and below the mean. Finally, the distribution in red shows the expected Poisson distribution, as a function of the mean of the data ($\bar{x}$), with a one standard deviation range also shaded in red (where the expected standard deviation for the Poisson is $\sigma=\sqrt{\bar{x}}$). The distribution in cyan shows the Gausian fit using the mean and standard deviation of the data ($\bar{x}, s$).
+
+The right side of each panel shows the 2D images. In order to visualize the detector counts per pixel, we must map the number of counts to an RGB color value, which we use the {\tt matplotlib} `gray' colormap for. To emphasize the features in the data, we choose the min an max values of the colormap to be the 10th and 90th percentile counts of the data.
+
+\begin{figure}[H]
 \plotone{plots/exposure0.png}
-\caption{Combined bias frames.} \label{fig:bias}
-\end{figure}
-
-\subsection{Combined Images \& Histograms}
-The figures in \ref{fig:flats1} and \ref{fig:flats2} show the bias-subtracted, combined histograms and images for each of the eight different exposure times (3, 6, 12, 24, 48, 96, 192, 384, and 768 seconds). The left side of each panel shows the histogram of the number of detector counts in analog to digital units (ADU), normalized such that the sum of all of the bins is one (plotted in black). The solid blue vertical line marks the mean of the data, and the dashed blue line marks the median, indicating which distrubtions are skewed by outlying points (where the mean is far from the median): in the combined bias frame the mean is skewed higher than the center of the distribution, and for all of the other exposures the mean is skewed lower than the center. The two shades of green mark $\pm1$ and $\pm2$ standard deviations above and below the mean. For all distributions, the $\pm1\sigma$ lines lie far outside of the bulk of the distribution around the median, which indicates again that there are many outlying the part of the distribution shown. Finally, the distribution in red shows the expected Poisson distribution, as a function of the mean of the data ($\bar{x}$), with a one standard deviation range also shaded in red (where the expected standard deviation for the Poisson is $\sigma=\sqrt{\bar{x}}$).  
-
-The right side of each panel shows the 2D images. In order to visualize the detector counts per pixel, we must map the number of counts to an RGB color value, which we use the matplolib 'gray' colormap for. To emphasize the features in the data, we choose the min an max values of the colormap to be the 10th and 90th percentile counts of the data.
-
-
-\begin{figure}[ht]
-\plotone{plots/exposure3.png}
-\plotone{plots/exposure6.png}
-\plotone{plots/exposure12.png}
-\plotone{plots/exposure48.png}
-\caption{Combined, bias-subtracted, flat frame histograms and images for varying exposure times (0, 3, 6, and 12 sec). \label{fig:flats1}}
-\end{figure}
-\begin{figure}[ht]
-\plotone{plots/exposure96.png}
-\plotone{plots/exposure192.png}
-\plotone{plots/exposure384.png}
-\plotone{plots/exposure768.png}
-\caption{Combined, bias-subtracted, flat frame histograms and images for varying exposure times (96, 192, 384, and 768 sec). \label{fig:flats2}}
+\caption{Combined bias frames.} \label{fig:bias}{}
 \end{figure}
 
 \subsection{Mean of the Mean \& Standard Deviation of the Mean}
 Describe computation, show plots
 
 \subsection{Quatifying Detector Noise}
-Calculate readnoise n stuff
+Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is XX, with a very small second-order correction of XX.
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \begin{center}
 \includegraphics[width=.48\linewidth]{plots/mean_vs_variance.png}
 \caption{Mean vs. variance for all bias-subtracted exposures, fitted to a second-order polynomial.} \label{fig:mean_var}
@@ -131,7 +125,9 @@ Calculate readnoise n stuff
 % ==================================
 \section{Discussion}
 \subsection{Poisson \& Gaussian Comparisons} \label{subsec:dist_comparisons}
-Looking at Figures \ref{fig:flats1} and \ref{fig:flats2}, we find that the detector count distribution is close to a Poisson distribution for low exposure times, but for larger exposure times it increasingly diverges with a much larger standard deviations than expected (as summarized by Figure \ref{fig:mean_var}). We also see that low exposure times (3, 6, and 12 sec) have a single peak in the distribution around the mean, however at 48 sec the distribution becomes bimodal, and for high exposure times (96, 192, 384, and 768 sec) the distribution develops three separate peaks. Comparing these histograms to the corresponding images at the right, we can see the regions on the detector which correspond to the different peaks: the dark edges make up roughly the bottom third of the distribution, and the bright center making up the higher thrid of the distribution. If the distribution was Poissonian for each pixel, we would expect the signal to vary uniformly across the detector, but instead there is obvious contamination at different spatial regions.
+Looking at Figures \ref{fig:flats1} and \ref{fig:flats2}, we find that the detector count distribution is close to a Poisson distribution for low exposure times, but for larger exposure times it increasingly diverges with a much larger standard deviations than expected (as summarized by Figure \ref{fig:mean_var}). 
+
+We also see that low exposure times (3, 6, and 12 sec) have a single peak in the distribution around the mean, however at 48 sec the distribution becomes bimodal, and for high exposure times (96, 192, 384, and 768 sec) the distribution develops three separate peaks. Comparing these histograms to the corresponding images at the right, we can see the regions on the detector which correspond to the different peaks: the dark edges make up roughly the bottom third of the distribution, and the bright center making up the higher thrid of the distribution. 
 
 \subsection{Sources of Noise \& Systematic Effects}
 Variations in the quantum efficiency of each pixel.
@@ -139,7 +135,7 @@ Dust particles on the lens scatter and absorb light unevenly at different points
 
 Checked for systematics due to temperature variation that could maybe be responsible for dark current: found temperature to vary only within 4C (Figure \ref{fig:temp}). Checked for systematic differences in different datasets. 
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \begin{center}
 \includegraphics[width=.48\linewidth]{plots/exposure_temp.png}
 \caption{Temperature of the CCD detector for different exposure frames does not vary more than about 4C.} \label{fig:temp}
@@ -149,24 +145,30 @@ Checked for systematics due to temperature variation that could maybe be respons
 % ==================================
 \section{Conclusion}
 
+
 % ==================================
 \section{Author Contributions}
 
 This project was done in collaboration with Julian Beas-Gonzalez and Russell Van-Linge (Group E), using data collected by Group B. Russell wrote code for fitting Poisson and Gaussian distribtions and computing MOM/SDOM, Julian wrote code for histograms and computing MOM/SDOM, and I wrote code for combining frames/bias subtracting images, plotting histograms/images and slicing images (except for a few snippets for making histograms and reading fits files from the class notes). We met several times outside of class to compare results, fix issues, and combine our code together, which can be found on github: \href{https://github.com/jbirky/photonCounting}{https://github.com/jbirky/photonCounting}.
 
+\begin{figure}[H]
+\plotone{plots/exposure3.png}
+\plotone{plots/exposure6.png}
+\plotone{plots/exposure12.png}
+\plotone{plots/exposure48.png}
+\caption{Combined, bias-subtracted, flat frame histograms and images for varying exposure times (0, 3, 6, and 12 sec). \label{fig:flats1}}
+\end{figure}
+\begin{figure}[H]
+\plotone{plots/exposure96.png}
+\plotone{plots/exposure192.png}
+\plotone{plots/exposure384.png}
+\plotone{plots/exposure768.png}
+\caption{Combined, bias-subtracted, flat frame histograms and images for varying exposure times (96, 192, 384, and 768 sec). \label{fig:flats2}}
+\end{figure}
+
 % ==================================
+\newpage
 \section{Appendix}
-
-\subsection{Statistics}
-Mean and variance for a set of data points $x={x_1, ...,x_N}$:
-\begin{equation}
-	\bar{x} = \frac{1}{N} \sum^N_{i=1} x_i  
-\end{equation}
-\begin{equation}
-	s^2 = \frac{1}{N-1} \sum^N_{i=1} (x_i - \bar{x})^2
-\end{equation}
-
-\subsection{Code}
 
 \lstset{language=Python,
         basicstyle=\footnotesize\ttfamily,
@@ -177,8 +179,9 @@ Mean and variance for a set of data points $x={x_1, ...,x_N}$:
         commentstyle=\color{gcolor},
         morecomment=[l][\color{gray}]{\#}
 }
+
+\subsection{Statistical Code} \label{code:stats}
 \small
-\textbf{Statistical Code} \label{code:stats} \\
 \hrule
 \begin{lstlisting}
 def mean(array):
@@ -195,8 +198,9 @@ def gaussian(data,mean,sigma):
     gdist = np.array((1/(sigma*(2*math.pi)**(.5)))*np.exp(-.5*((data-mean)/sigma)**2)) 
     return gdist
 \end{lstlisting}
+\hrule \vspace{7pt}
 
-\textbf{Data Processing code} \label{code:data} \\
+\subsection{Data Processing code} \label{code:data} 
 \hrule
 \begin{lstlisting}
 def readData(folder):
@@ -226,8 +230,9 @@ def combineFrame(data_array):
     
     return np.median(data_array, axis=0)
 \end{lstlisting}
+\hrule \vspace{7pt}
 
-\textbf{Histogram/Image code} \label{code:plots} \\
+\subsection{Histogram/Image code} \label{code:plots} 
 \hrule
 \begin{lstlisting}
 def plotAll(array2D, **kwargs):
@@ -304,7 +309,8 @@ def plotAll(array2D, **kwargs):
     hrng = kwargs.get('hrng', [np.percentile(arr, 10), np.percentile(arr, 90)])
     pl = ax2.imshow(array2D, origin='lower', interpolation='nearest', \
          cmap='gray', vmin=hrng[0], vmax=hrng[1])
-    fig.colorbar(pl, ax=ax2, fraction=0.046, pad=0.04).set_label('Detector Value (ADU)')
+    fig.colorbar(pl, ax=ax2, fraction=0.046, \
+                 pad=0.04).set_label('Detector Value (ADU)')
     
     ax2.set_xlabel('pixels(x)')
     ax2.set_ylabel('pixels(y)')
@@ -315,6 +321,49 @@ def plotAll(array2D, **kwargs):
         plt.savefig(save_dir + 'exposure%s.png'%(exp))
     plt.show()
 \end{lstlisting}
+\hrule \vspace{7pt}
+
+\subsection{Data Reduction} \label{code:reduction} 
+\hrule
+\begin{lstlisting}
+files = natsorted(os.listdir('data/'))[1:]
+exp_times = np.array([int(f.split('exp')[1]) for f in files])
+
+#combined frames, and combined frames in counts per second
+counts, counts_ps = [], []
+for exp in exp_times:
+    
+    #Read frames, subtract combined bias, combine frames
+    array3D = readData('data/exp%s/'%(exp))
+    bias_sub_3D = [(frame - bias_2D) for frame in array3D]
+    array2D = combineFrame(bias_sub_3D)
+    
+    array2D_cps = array2D/exp
+    
+    #cut out safe part of image
+    cut = Cutout2D(array2D, window[0], window[1]).data
+    cut_cps = Cutout2D(array2D_cps, window[0], window[1]).data
+    
+    counts.append(cut.flatten())
+    counts_ps.append(cut_cps.flatten())
+    
+    #Plot histogram and image & save to .png
+    plotAll(cut, sigma=3, exp=exp, show_level=True, save_dir='writeup/plots/')
+\end{lstlisting}
+\hrule \vspace{7pt}
+
+\subsection{Gain Calculation} \label{code:gain} 
+\hrule
+\begin{lstlisting}
+xbar = np.mean(counts, axis=1)
+s = np.std(counts, axis=1)
+
+#fit polynomial
+x_arr = np.arange(0, 10**5, 10**2)
+fit = np.polyfit(xbar, s**2, 2)
+y_arr = np.polyval(fit, x_arr)
+\end{lstlisting}
+\hrule \vspace{7pt}
 
 % \lstinputlisting[language=Matlab]{./Code/calc_error.m}
 
