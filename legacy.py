@@ -64,3 +64,26 @@ def factorial(n, **kwargs):
         nfact = math.sqrt(2*math.pi) * n**(n+.5) / math.e**n
         
     return nfact
+
+def cutData(array, **kwargs):
+    
+    avg = mean(array)
+    std = stdev(array)
+    arr_rng = [min(array), max(array)]
+    
+    if 'sigma' in kwargs:
+        sigma = kwargs.get('sigma')
+        low = int(np.round((avg-sigma*std)))
+        high = int(np.round((avg+sigma*std)))
+        cut = kwargs.get('cut', [low, high])
+    elif 'rng' in kwargs:
+        cut = kwargs.get('rng')
+    else:
+        cut = kwargs.get('cut', arr_rng)
+    pixel_keep = np.where((array > cut[0]) & (array < cut[1]))[0]
+    
+    cut_array = array[pixel_keep]
+    per_rem = np.round((1 - len(cut_array)/len(array))*100,2)
+    print('Cut from range %s to %s, removing %s percent of data points'%(arr_rng, cut, per_rem))
+    
+    return cut_array
