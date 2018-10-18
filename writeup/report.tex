@@ -60,15 +60,6 @@ In practice, the Poisson distribution is unstable to compute for large values of
 n! \sim \sqrt{2\pi n}\left(\frac{n}{e} \right)^n
 \end{equation}
 
-We found that the Sterling approximation is advantageous for approximating the Poisson at continuous values of x (whereas the exact method for computing can only take discrete values of x for $x!$), however it does not make the solution any more numerically stable for values of x larger than $\sim15$ (Figure \ref{fig:poisson}).
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=.48\linewidth]{plots/poisson_comparisons.png}
-\caption{Comparison of different methods for computing the Poisson distribution.} \label{fig:poisson}
-\end{center}
-\end{figure}
-
 \subsection{Data Manipulation}
 Procedure to combine frames and subtract bias, point to code
 
@@ -137,7 +128,7 @@ Checked for systematics due to temperature variation that could maybe be respons
 % ==================================
 \section{Author Contributions}
 
-This project was done in collaboration with Julian Beas-Gonzalez and Russell Van-Linge (Group E), using data collected by Group B. The code written is my own (except for a few snippets for making histograms and reading fits files from the class notes), and can be found on github: \href{https://github.com/jbirky/photonCounting}{https://github.com/jbirky/photonCounting}.
+This project was done in collaboration with Julian Beas-Gonzalez and Russell Van-Linge (Group E), using data collected by Group B. Russell wrote code for fitting Poisson and Gaussian distribtions and computing MOM/SDOM, Julian wrote code for histograms and computing MOM/SDOM, and I wrote code for combining frames/bias subtracting images, plotting histograms/images and slicing images (except for a few snippets for making histograms and reading fits files from the class notes). We met several times outside of class to compare results, fix issues, and combine our code together, which can be found on github: \href{https://github.com/jbirky/photonCounting}{https://github.com/jbirky/photonCounting}.
 
 % ==================================
 \section{Appendix}
