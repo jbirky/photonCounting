@@ -50,3 +50,17 @@ def plotHist(arr, **kwargs):
         plt.title('Exposure Time: %s sec'%(exp))
     plt.xlim(rng)
     plt.show()
+
+def factorial(n, **kwargs):
+    
+    method = kwargs.get('method', 'sterling')
+    
+    if method == 'exact':
+        nfact = 1
+        for i in range(n):
+            nfact *= (i+1)
+    # sterling approximation
+    elif method == 'sterling': 
+        nfact = math.sqrt(2*math.pi) * n**(n+.5) / math.e**n
+        
+    return nfact
