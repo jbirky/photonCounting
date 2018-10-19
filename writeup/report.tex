@@ -22,7 +22,7 @@
 \email{jbirky@ucsd.edu}
 
 \begin{abstract}
-In this lab, we examine the statistics of photon counting, and the noise properties of a charged couple device (CCD) from $2048\times2048$ pixel optical images taken on the Nickel 1 meter direct imaging camera. In particular we characterize the effect of several types of noise: first the inherent noise of photon counting by comparing to the Poisson distribution, second the read noise associated with random charge loss and gains, and lastly we comment the effect of different systematics such as instrument defects or dark current due to temperature variations. In total we collect 22 frames integrated at varying exposure times ranging from 0 to 768 seconds. Comparing the slope between mean and variance of each bias-subtracted, combined frame of each exposure, we determine the gain of the detector to be 0.31 ADU/electron. Normalizing our frames (dividing the counts by exposure time) we find that as we add more exposures, the mean of the mean (MOM) detector counts per second converges to 50.2 ADU/s and the standard deviation of the mean (SDOM) decreases to 34.2 ADU/s with more frames added.
+In this lab, we examine the statistics of photon counting, and the noise properties of a charged couple device (CCD) from $2048\times2048$ pixel optical images taken on the Nickel 1 meter direct imaging camera. In particular we characterize the effect of several types of noise: first the inherent noise of photon counting by comparing to the Poisson distribution, second the read noise associated with random charge loss and gains, and lastly we comment the effect of different systematics such as instrument defects or dark current due to temperature variations. In total we collect 22 frames integrated at varying exposure times ranging from 0 to 768 seconds. Comparing the slope and intercept between mean and variance of each bias-subtracted, combined frame of each exposure, we determine the gain of the detector to be 0.31 ADU/electron and the readnoise to be 34 electron. Normalizing our frames (dividing the counts by exposure time) we find that as we add more exposures, the mean of the mean (MOM) detector counts per second converges to 50.2 ADU/s and the standard deviation of the mean (SDOM) decreases to 34.2 ADU/s with more frames added.
 
 \end{abstract}
 \bigskip
@@ -30,7 +30,7 @@ In this lab, we examine the statistics of photon counting, and the noise propert
 \section{Introduction} 
 Nearly the only way to study the Universe on the largest of scales (such as stars and galaxies), and probe into the 12 to 14 billion years of our Universe's history (such as detecting cosmic microwave background) requires measuring information in the form of light, traveling at $3\times10^8$ m/s. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves), far beyond the optical range accessible to our eyes using telescopes of previous times. Because the measurement of light is so fundamental, understanding how modern detectors measure electromagnetic radiation, the statistics of photon collection, as well as the limitations of the instrument and sources of contaminations are a important first steps before performing any scientific analysis of light with an instrument.
 
-In particular, this lab seeks to understand how charged coupled device (CCD) detectors 
+In particular, this lab seeks to understand how charged coupled device (CCD) detectors work for collecting photons at optical wavelengths.
 
 % ==================================
 \section{Observations}
@@ -83,7 +83,7 @@ where the input parameters are the mean and standard deviation of the data ($\mu
 \subsection{Data Reduction} \label{sec:reduction}
 For each exposure observed, the data output from the Nickel instrument is stored in a fits file, which contains the two-dimensional array of detector counts at each pixel, as well as other relevant variables about the detection (such as the detector temperature, time of observation, exposure time, etc.). The first step of reduction consists of combining the bias frames, and our procedure for combining frames (lines $19-26$, \ref{code:data}) is to take the median count value at each pixel. Second, for each exposure, we read the individual files from a directory, subtract the combined bias, then combine those into a single frame (lines $9-11$, \ref{code:reduction}).
 
-As discussed in further the results (\ref{subsec:systematics}), large chunks of the $2048\times2048$ pixel image contain detector defects and contaminations which skew the distribution of light counts. In order to reduce these effects, we slice our image to a $15\times15$ pixel section chosen from the longest exposure time image (Figure \ref{fig:slice}).
+As discussed in further the results (\ref{subsec:systematics}), large chunks of the $2048\times2048$ pixel image contain detector defects and contaminations which skew the distribution of light counts. In order to reduce these effects, we slice our image to a $15\times15$ pixel section chosen from the longest exposure time image (Figure \ref{fig:slice}) before performing bias subtraction.
 
 \subsection{Types of Detector Noise} \label{subsec:noise}
 Photons collected by the detector of an instrument are not counted directly--the CCD used by the Nickel telescope relies on the photoelectric effect, meaning that it photons excite electrons on a piece of semiconductor and the charge from those electrons is recorded by an analog to digital converter (ADC) in analog to digital units (ADU; an 8-bit number $0-255$ which can be stored on a computer). In order to reverse this and determine the actual number of photons from ADU counts, we must know how to convert the voltage of the accumulated charge 
@@ -101,7 +101,7 @@ Propagating the error (assuming negligable covariance), we get a formula that re
     \left(\frac{\partial ADU}{\partial \sigma_0} \right) \sigma_0^2 \\
     &= \frac{ge}{C} \left(ADU - ADU_0 \right) + \sigma_0^2
 \end{align}
-Thus the gain (ge/C) is the linear slope between the mean and variance of the ADU counts for each bias-subtracted, combined exposure frame $\left(ADU - ADU_0 \right)$. To numerically determine the gain from our data we fit a second-order polynomial to our mean vs. variance plot (lines $1-7$, \ref{code:gain}), and the gain is then the first order term (coefficient of x).
+Thus the gain (ge/C) is the linear slope between the mean and variance of the ADU counts for each bias-subtracted, combined exposure frame $\left(ADU - ADU_0 \right)$, and the readnoise is the intercept $\sigma_0$. To numerically determine the gain from our data we fit a second-order polynomial to our mean vs. variance plot (lines $1-7$, \ref{code:gain}), and the gain is then the first order term (coefficient of x).
 
 % ==================================
 \section{Data Analysis \& Modeling}
@@ -121,20 +121,26 @@ The right side of each panel shows the 2D images. In order to visualize the dete
 \subsection{Mean of the Mean \& Standard Deviation of the Mean}
 For each of our bias-subtracted frames, we divide the arrays by their exposure times to put them on the same scale of counts per second, and we take the means (giving us a $1\times22$ array of the average values for 22 frames). Next we compute the mean of the mean (MOM) and standard deviation of the mean (SDOM) in a for loop (lines $1-37$, \ref{code:mom_sdom}): the first MOM/SDOM are the mean and standard deviation of the first frame taken, the second is the MOM/SDOM for the first two frames, and so on. The resulting plot (Figure \ref{fig:mom_sdom}) shows how the standard deviation decreases with larger N (more number of observations) and the mean stays roughly constant because the normalized distributions are centered around roughly the same peak.
 
+More precisely, the standard deviation decreases by a factor of 1/$\sqrt{N}$. This factor arises because each distribution is approximately Gaussian (as seen in the histogram fits) and they are normalized to the same count, so we can assume we are roughly summing together individual Gaussians with the same mean and standard deviation parameters. If we consider generally $n$ gaussian distributed random numbers $X_1,...,X_i,...,X_n \sim N(\mu,\sigma^2)$, the variance of the sum of the distributions is then
+\[Var(X_1 + ... + X_n) = Var(X_1) + ... + Var(X_n) = n Var(X_i) \]
+since the variance of the Gaussian is linear. Then we get the standard deviation of the sum is just the square root
+\[Std(X_1 + ... + X_n) = \sqrt{n Var(X_i)} = \sqrt{n}\sigma \]
+meaning as you add more gaussian distributed observations, the SDOM decreases by 1/$\sqrt{n}$.
+
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=.48\linewidth]{plots/mom_sdom.png}
-\caption{Mean of the mean and standard deviation of the mean vs. number of frames taken. \textit{Credit: Russell}} \label{fig:mom_sdom}
+\caption{Mean of the mean and standard deviation of the mean vs. number of frames taken (N). In red we show the predicted SDOM, which decreases by factor of 1/$\sqrt{N}$ for each frame added. \textit{Credit: Russell}} \label{fig:mom_sdom}
 \end{center}
 \end{figure}
 
 \subsection{Quatifying Detector Noise} \label{subsec:gain}
-Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is 0.31 ADU/electron, with a very small second-order correction of $4.2\times10^{-5}$ ADU/electron.
+Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is 0.31 ADU/electron, with a very small second-order correction of $4.2\times10^{-5}$ ADU/electron. The intercept (readnoise) of the fit is 34 electrons. Although the fit looks like it represents the data points well, our results deviate from the official specifications listed on the Nickel website, which state the gain is 0.56 ADU/electron and the readnoise is 10.7 electrons.
 
 \begin{figure}[H]
 \begin{center}
 \includegraphics[width=.48\linewidth]{plots/mean_vs_variance.png}
-\caption{Mean vs. variance for all bias-subtracted exposures, fitted to a second-order polynomial.} \label{fig:mean_var}
+\caption{Mean vs. variance for all bias-subtracted exposures, fitted to a second-order polynomial. First order coefficient represents the gain, intercept represents the readnoise.} \label{fig:mean_var}
 \end{center}
 \end{figure}
 
@@ -167,7 +173,7 @@ We also checked for systematics due to temperature variation that could maybe be
 
 % ==================================
 \section{Conclusion}
-In conclusion we measure the gain of our detector to be about 0.31 ADU/electron. For varied exposure times we find that the Poisson distribution applies better when the frequency of our counts are low, and the Gaussian distribution applies better when the frequencies are high. We also find that adding more data decreases the standard deviation of the mean by 1/$\sqrt{n}$. In the future, understanding the fundamental sources of noise and their statistics will allow us to determine what signals are significant in an observation and make meaningful scientific conclusions.
+In conclusion we measure the gain of our detector to be about 0.31 ADU/electron and readnoise to be 34 electrons. For varied exposure times we find that the Poisson distribution applies better when the frequency of our counts are low, and the Gaussian distribution applies better when the frequencies are high. We also find that adding more data decreases the standard deviation of the mean by 1/$\sqrt{n}$. In the future, understanding the fundamental sources of noise and their statistics will allow us to determine what signals are significant in an observation and make meaningful scientific conclusions.
 
 % ==================================
 \section{Author Contributions}
