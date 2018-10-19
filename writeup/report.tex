@@ -28,13 +28,15 @@ In this lab, we examine the statistics of photon counting, and the noise propert
 \bigskip
 
 \section{Introduction} 
-Nearly the only way to study the Universe on the largest of scales (such as stars and galaxies), and probe into the 12 to 14 billion years of our Universe's history (such as detecting cosmic microwave background) requires measuring information in the form of light, traveling at $3\times10^8$ m/s. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves), far beyond the optical range accessible to our eyes using telescopes of previous times. Because the measurement of light is so fundamental, understanding how modern detectors measure electromagnetic radiation, the statistics of photon collection, as well as the limitations of the instrument and sources of contaminations are a important first steps before performing any scientific analysis of light with an instrument.
+Nearly the only way to study the Universe on the largest of scales (such as stars and galaxies), and probe into the 12 to 14 billion years of our Universe's history (such as detecting cosmic microwave background from the early Universe) requires measuring information in the form of light, traveling at $3\times10^8$ m/s. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves), far beyond the optical range accessible to our eyes using telescopes of previous times. Because the measurement of light is so fundamental, understanding how modern detectors measure electromagnetic radiation, the statistics of photon collection, as well as the limitations of the instrument and sources of contaminations are a important first steps before performing any scientific analysis of light with an instrument.
 
-In particular, this lab seeks to understand how charged coupled device (CCD) detectors work for collecting photons at optical wavelengths.
+Three types of detectors in astronomy measure light using different approaches: coherent detectors measure the amplitude and phase of the electric field produced by an electromagnetic wave, calorimetric detectors measure the heat produced from radiation, and photoelectron detectors indirectly measure photons by counting electrons which are produced by the photoelectric effect when light excites electrons on a piece of semiconductor. In particular, this lab seeks to understand how photoelectric detectors called charged coupled device (CCD) detectors work for collecting photons at optical wavelengths.
+
+As we'll see in later sections, there are several sources of noise associated with CCDs that are important to classify: (1) the Photon noise associated with Poisson statistics, (2) the bias level noise associated with electronic variation which varies pixel-to-pixel, (3) readnoise associated with random fluctuations of charge loss/gains when electrons are shuffled between detector pixels to be readout, (4) the dark current noise from the heat of the detector which may cause more electrons to excite for higher temperatures, and (5) any systematics like defects in the detector. Section \ref{sec:methods} covers how we quantify these sources of noise, and Section \ref{sec:analysis} shows what values we compute for data taken on the Nickel Observatory described in Section \ref{sec:observations}. 
 
 % ==================================
-\section{Observations}
-Observations are taken on the Nickel 1 meter telescope, Lick Observatory located on Mount Hamilton. We recorded 22 frames in total (Table \ref{table:log}) using the B filter, corresponding to the optical wavelengths $3,500-5,000$ Angstroms. Frames are labeled as either `Bias' (open shutter for zero second exposure), or `Flat' (several second exposure).
+\section{Observations} \label{sec:observations}
+Observations are taken on the Nickel 1 meter telescope, Lick Observatory located on Mount Hamilton. We recorded 22 frames in total (Table \ref{table:log}) using the B filter, corresponding to the optical wavelengths $3,500-5,000$ Angstroms\footnote{https://mthamilton.ucolick.org/techdocs/filters/B\_plot.html}. Frames are labeled as either `Bias' (open shutter for zero second exposure), or `Flat' (several second exposure).
 
 \begin{table}[H]
 \centering
@@ -60,7 +62,7 @@ Observations are taken on the Nickel 1 meter telescope, Lick Observatory located
 
 
 % ==================================
-\section{Data Reduction \& Methods}
+\section{Data Reduction \& Methods} \label{sec:methods}
 \subsection{Theoretical Distribution of Light} \label{subsec:distributions}
 Before we can characterize our observations, it is important to first determine what we expect our data will look like. That is, we are measuring the number of photons hitting a detector over a fixed amount of time, what do we predict will be the number of photons that will hit each pixel in that tme interval? Let's assume that on average $\mu$ photons will hit a pixel over fixed time interval $t$. Now consider dividing that time interval into $n$ increments: the probability that a $n$ photons arrive to the detector is approximately Binomial with probability parameter $\mu/n$. Now in the limit that $n\rightarrow\infty$, we come to the Poisson distribution:
 \begin{equation}
@@ -104,7 +106,7 @@ Propagating the error (assuming negligable covariance), we get a formula that re
 Thus the gain (ge/C) is the linear slope between the mean and variance of the ADU counts for each bias-subtracted, combined exposure frame $\left(ADU - ADU_0 \right)$, and the readnoise is the intercept $\sigma_0$. To numerically determine the gain from our data we fit a second-order polynomial to our mean vs. variance plot (lines $1-7$, \ref{code:gain}), and the gain is then the first order term (coefficient of x).
 
 % ==================================
-\section{Data Analysis \& Modeling}
+\section{Data Analysis \& Modeling} \label{sec:analysis}
 
 \subsection{Diagnostic Plots: Combined Images \& Histograms} \label{subsec:diagnostic}
 Figure \ref{fig:bias} shows the combined bias frames, and the figures in \ref{fig:flats1} and \ref{fig:flats2} show the bias-subtracted, combined histograms and images for each of the eight different exposure times (3, 6, 12, 24, 48, 96, 192, 384, and 768 seconds), using the procedures described in \ref{sec:reduction}. Lines $25-33$ of \ref{code:plots} plots the histogram, and lines $72-75$ plot the image.
@@ -145,7 +147,7 @@ Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted
 \end{figure}
 
 % ==================================
-\section{Discussion}
+\section{Discussion} \label{sec:discussion}
 \subsection{Poisson \& Gaussian Comparisons} \label{subsec:dist_comparisons}
 As described in Section \ref{subsec:distributions}, we expect that the Poisson distribution would approximate our data well when $\mu$ is the smallest (the frames with lower exposure times). However, our results in Figures \ref{fig:flats1} and \ref{fig:flats2} show the opposite trend: the Gaussian appears to be a slightly better fit for low exposure times, but the Poisson appears better for higher exposure times.
 
