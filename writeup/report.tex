@@ -67,7 +67,7 @@ Before we can characterize our observations, it is important to first determine 
 \begin{equation}
 P(x;\mu) = \frac{\mu^x}{x!}e^{-\mu}
 \end{equation}
-which we interpret as the probability that x photons will arrive to a detector pixel in time interval $t$, given that $\mu$ photons arrive in that interval on average. The expected mean and variation for this distribution being $\langle x \rangle = \mu$ and $\langle \sigma^2 \rangle = \mu$. Under the conditions that the mean of the data is much smaller than the number of observations ($\mu << n$), and 
+which we interpret as the probability that x photons will arrive to a detector pixel in time interval $t$, given that $\mu$ photons arrive in that interval on average. The expected mean and variation for this distribution being $\langle x \rangle = \mu$ and $\langle \sigma^2 \rangle = \mu$. 
 
 In practice, the Poisson distribution is unstable to compute for large values of x because the term $x!$ becomes too large for the memory of the computer to handle. In order to try to reduce the memory load for large values of x, we approximate the $x!$ term using the Sterling approximation:
 \begin{equation}
@@ -75,7 +75,7 @@ n! \sim \sqrt{2\pi n}\left(\frac{n}{e} \right)^n
 \end{equation}
 the code for the Poisson distribution is implemented in lines $7-9$ of Appendix \ref{code:stats}.
 
-However when the conditions for the Poisson distribution are not met very well, the Gaussian distribution may instead be a good approximation:
+However when the conditions for the Poisson distribution are not met very well (average number of successes is much smaller than the probable value ($\mu << n$), and the number of counts are low), the Gaussian distribution may instead be a good approximation:
 \begin{equation}
 P(x; \mu, \sigma) = \frac{1}{\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
 \end{equation}
@@ -106,11 +106,18 @@ The right side of each panel shows the 2D images. In order to visualize the dete
 
 \begin{figure}[H]
 \plotone{plots/exposure0.png}
-\caption{Combined bias frames.} \label{fig:bias}{}
+\caption{Combined bias frames.} \label{fig:bias}
 \end{figure}
 
 \subsection{Mean of the Mean \& Standard Deviation of the Mean}
-Describe computation, show plots
+For each of our bias-subtracted frames, we divide the arrays by their exposure times to put them on the same scale of counts per second, and we take the means (giving us a 1x27 array of the average values for 27 frames). Next we compute the mean of the mean (MOM) and standard deviation of the mean (SDOM) in a for loop (lines $1-37$, \ref{code:mom_sdom}): the first MOM/SDOM are the mean and standard deviation of the first frame taken, the second is the MOM/SDOM for the first two frames, and so on. The resulting plot (Figure \ref{fig:mom_sdom}) shows how the standard deviation decreases with larger N (more number of observations) and the mean stays roughly constant because the normalized distributions are centered around roughly the same peak.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=.48\linewidth]{plots/mom_sdom.png}
+\caption{Mean of the mean and standard deviation of the mean vs. number of frames taken. \textit{Credit: Russell}} \label{fig:mom_sdom}
+\end{center}
+\end{figure}
 
 \subsection{Quatifying Detector Noise}
 Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is XX, with a very small second-order correction of XX.
@@ -368,7 +375,43 @@ y_arr = np.polyval(fit, x_arr)
 \subsection{MOM and SDOM Calculation} \label{code:mom_sdom} 
 \hrule
 \begin{lstlisting}
-a
+files = np.array(natsorted(os.listdir()))
+data = []
+
+# Go through each frame, take the median, subtract bias, and divide 
+# by exposure time
+for i in files:
+
+    # loading in the data
+    frame_data = fits.getdata(i)
+    frame_exp = fits.open(i)
+    exp_time = frame_exp[0].header['EXPTIME']
+    # Subtracting the bias
+    data_subbed = frame_data - bias_2D
+    data_median_ps = np.median(data_subbed,axis=0)/exp_time
+    # Median of each frame divided by exposure time for that frame
+    data.append(data_median_ps)
+   
+data = np.array(data)
+
+# Setting up arrays 
+mom = []
+std = []
+num_frame = np.arange(2,len(data)+1)
+
+# Calculates MOM and SDOM 
+i = 2
+while i < len(data)+1:
+    frames = data[:i]
+    mean = np.mean(frames) 
+    stand = np.std(frames)
+    mom.append(mean)
+    std.append(stand)
+    i = i + 1
+
+plt.scatter(num_frame,mom,marker='x',color='black',label='MOM')
+plt.scatter(num_frame,std,marker='v',color='gray',label='SDOM')
+plt.show()
 \end{lstlisting}
 \hrule \vspace{7pt}
 
