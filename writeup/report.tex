@@ -135,7 +135,7 @@ meaning as you add more gaussian distributed observations, the SDOM decreases by
 \end{figure}
 
 \subsection{Quatifying Detector Noise} \label{subsec:gain}
-Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is 0.31 ADU/electron, with a very small second-order correction of $4.2\times10^{-5}$ ADU/electron. The intercept (readnoise) of the fit is 34 electrons. Although the fit looks like it represents the data points well, our results deviate from the official specifications listed on the Nickel website, which state the gain is 0.56 ADU/electron and the readnoise is 10.7 electrons.
+Figure \ref{fig:mean_var} is the mean vs. variance plot for each bias-subtracted, combined exposure. As described in \ref{subsec:noise} we fit a second-order polynomial using {\tt numpy} to the point on the plot. The fit is mostly described by the first-order gain term which is 0.31 ADU/electron, with a very small second-order correction of $4.2\times10^{-5}$ ADU/electron. The intercept (readnoise) of the fit is 34 electrons. Although the fit looks like it represents the data points well, our results deviate from the official specifications listed on the Nickel website\footnote{\footnotesize https://mthamilton.ucolick.org/techdocs/instruments/nickel\_direct/detector/ \\?fbclid=IwAR1jiS4gzq1GNTfHfXq6cv2KNNky70EokCcHCyL6h0spe4YHOJ2VdZsyRSw}, which state the gain is 0.56 ADU/electron and the readnoise is 10.7 electrons.
 
 \begin{figure}[H]
 \begin{center}
