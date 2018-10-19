@@ -122,9 +122,9 @@ The right side of each panel shows the 2D images. In order to visualize the dete
 For each of our bias-subtracted frames, we divide the arrays by their exposure times to put them on the same scale of counts per second, and we take the means (giving us a $1\times22$ array of the average values for 22 frames). Next we compute the mean of the mean (MOM) and standard deviation of the mean (SDOM) in a for loop (lines $1-37$, \ref{code:mom_sdom}): the first MOM/SDOM are the mean and standard deviation of the first frame taken, the second is the MOM/SDOM for the first two frames, and so on. The resulting plot (Figure \ref{fig:mom_sdom}) shows how the standard deviation decreases with larger N (more number of observations) and the mean stays roughly constant because the normalized distributions are centered around roughly the same peak.
 
 More precisely, the standard deviation decreases by a factor of 1/$\sqrt{N}$. This factor arises because each distribution is approximately Gaussian (as seen in the histogram fits) and they are normalized to the same count, so we can assume we are roughly summing together individual Gaussians with the same mean and standard deviation parameters. If we consider generally $n$ gaussian distributed random numbers $X_1,...,X_i,...,X_n \sim N(\mu,\sigma^2)$, the variance of the sum of the distributions is then
-\[Var(X_1 + ... + X_n) = Var(X_1) + ... + Var(X_n) = n Var(X_i) \]
+\[Var(\bar{X}) = Var(\frac{1}{N}\sum_{i=1}^N X_i) = \frac{1}{n^2} Var(X_i) = \frac{1}{n^2} \cdot n\sigma^2 \]
 since the variance of the Gaussian is linear. Then we get the standard deviation of the sum is just the square root
-\[Std(X_1 + ... + X_n) = \sqrt{n Var(X_i)} = \sqrt{n}\sigma \]
+\[Std(\bar{X}) = \sqrt{Var(\bar{X})} = \frac{\sigma}{\sqrt{n}} \]
 meaning as you add more gaussian distributed observations, the SDOM decreases by 1/$\sqrt{n}$.
 
 \begin{figure}[H]
