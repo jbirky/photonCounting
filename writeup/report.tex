@@ -28,11 +28,9 @@ In this lab, we examine the statistics of photon counting, and the noise propert
 \bigskip
 
 \section{Introduction} 
-In order to understand the. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves). Understanding how detectors work, the statistics of light collection, as well as the limitations of the instrument and sources of contaminations are a fundamental first steps before performing any scientific analysis of light with an instrument.
+Nearly the only way to study the Universe on the largest of scales (such as stars and galaxies), and probe into the 12 to 14 billion years of our Universe's history (such as detecting cosmic microwave background) requires measuring information in the form of light, traveling at $3\times10^8$ m/s. Advancements in technology in the 20th century has now made it possible to observe electromagnetic radiation from the scales of $10^{-12}-10^3$m (as short as gamma rays to as long as radio waves), far beyond the optical range accessible to our eyes using telescopes of previous times. Because the measurement of light is so fundamental, understanding how modern detectors measure electromagnetic radiation, the statistics of photon collection, as well as the limitations of the instrument and sources of contaminations are a important first steps before performing any scientific analysis of light with an instrument.
 
-CCDs, the photoelectric effect
-
-Types of noise we want to quantify
+In particular, this lab seeks to understand how charged coupled device (CCD) detectors 
 
 % ==================================
 \section{Observations}
@@ -64,7 +62,7 @@ Observations are taken on the Nickel 1 meter telescope, Lick Observatory located
 % ==================================
 \section{Data Reduction \& Methods}
 \subsection{Theoretical Distribution of Light} \label{subsec:distributions}
-Before we can characterize our observations, it is important to first determine what we expect our data will look like. That is, we are measuring the number of photons hitting a detector over a fixed amount of time, what do we predict will be the number of photons that will hit each pixel in that tme interval? Let's assume that on average $\mu$ photons will hit a pixel over fixed time interval $t$. Now consider dividing that time interval into $n$ increments: the probability that a $n$ photons arrive to the detector is approximately Binomial. Now in the limit that $n\rightarrow\infty$, we arrive at the Poisson distribution:
+Before we can characterize our observations, it is important to first determine what we expect our data will look like. That is, we are measuring the number of photons hitting a detector over a fixed amount of time, what do we predict will be the number of photons that will hit each pixel in that tme interval? Let's assume that on average $\mu$ photons will hit a pixel over fixed time interval $t$. Now consider dividing that time interval into $n$ increments: the probability that a $n$ photons arrive to the detector is approximately Binomial with probability parameter $\mu/n$. Now in the limit that $n\rightarrow\infty$, we come to the Poisson distribution:
 \begin{equation}
 P(x;\mu) = \frac{\mu^x}{x!}e^{-\mu}
 \end{equation}
